@@ -25,6 +25,7 @@ dev = [
     "pytest>=8.3,<9.0",
     "httpx>=0.28,<1.0",
     "ruff>=0.9,<1.0",
+    "pre-commit",
 ]
 
 [tool.setuptools.packages.find]
@@ -37,3 +38,18 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # Помилки стилю pycodestyle
+    "F",    # Pyflakes: невикористані імпорти, undefined names
+    "W",    # Попередження pycodestyle
+    "I",    # Сортування імпортів
+    "UP",   # Сучасний синтаксис Python
+    "B",    # Потенційні помилки bugbear
+    "SIM",  # Спрощення коду
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
