@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import select
 
 from app.dependencies import CurrentUser, DbSession
 from app.models.course import Course
@@ -10,9 +9,7 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 def can_manage(course: Course, user) -> bool:
-    return user.role == "admin" or (
-        user.role == "teacher" and course.owner_id == user.id
-    )
+    return user.role == "admin" or (user.role == "teacher" and course.owner_id == user.id)
 
 
 @router.get("", response_model=list[CourseRead])

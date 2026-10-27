@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
+
 import jwt
 from pwdlib import PasswordHash
 
@@ -17,10 +18,8 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(subject: str) -> str:
-    now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(
-        minutes=settings.access_token_expire_minutes
-    )
+    now = datetime.now(UTC)
+    expires_at = now + timedelta(minutes=settings.access_token_expire_minutes)
     payload: dict[str, Any] = {
         "sub": subject,
         "iat": now,

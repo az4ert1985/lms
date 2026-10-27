@@ -22,9 +22,7 @@ class Settings(BaseSettings):
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
 
-    database_url: str = (
-        "postgresql+psycopg://lms:lms_dev_password@localhost:5432/lms"
-    )
+    database_url: str = "postgresql+psycopg://lms:lms_dev_password@localhost:5432/lms"
 
     jwt_secret_key: SecretStr = Field(
         default=SecretStr(""),
@@ -42,21 +40,16 @@ class Settings(BaseSettings):
         if self.app_env == "production":
             if len(secret) < 32:
                 raise ValueError(
-                    "JWT_SECRET_KEY must contain at least 32 characters "
-                    "in production."
+                    "JWT_SECRET_KEY must contain at least 32 characters in production."
                 )
             if "development-only" in secret.lower():
                 raise ValueError("Development JWT secret is forbidden in production.")
             if self.debug:
                 raise ValueError("DEBUG must be false in production.")
             if "localhost" in self.database_url:
-                raise ValueError(
-                    "Production DATABASE_URL must not use localhost."
-                )
+                raise ValueError("Production DATABASE_URL must not use localhost.")
         elif not secret:
-            self.jwt_secret_key = SecretStr(
-                "development-only-secret-change-me"
-            )
+            self.jwt_secret_key = SecretStr("development-only-secret-change-me")
 
         return self
 

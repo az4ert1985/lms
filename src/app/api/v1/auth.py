@@ -1,6 +1,5 @@
 from typing import Annotated
 
-import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
@@ -10,7 +9,6 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.db.session import get_db
 from app.dependencies import CurrentUser, DbSession
 from app.models.user import User
 from app.schemas.auth import TokenResponse
@@ -25,9 +23,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     status_code=status.HTTP_201_CREATED,
 )
 def register(payload: UserCreate, db: DbSession):
-    existing = db.scalar(
-        select(User).where(User.email == payload.email)
-    )
+    existing = db.scalar(select(User).where(User.email == payload.email))
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -51,9 +47,7 @@ def login(
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: DbSession,
 ):
-    user = db.scalar(
-        select(User).where(User.email == form.username.lower())
-    )
+    user = db.scalar(select(User).where(User.email == form.username.lower()))
 
     if (
         user is None

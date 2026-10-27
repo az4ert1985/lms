@@ -3,7 +3,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-
 Role = Literal["admin", "teacher", "student"]
 
 
