@@ -18,10 +18,7 @@ def get_course_or_404(db: Session, course_id: int) -> Course:
 
 
 def check_manager(course: Course, user) -> None:
-    if not (
-        user.role == "admin"
-        or (user.role == "teacher" and course.owner_id == user.id)
-    ):
+    if not (user.role == "admin" or (user.role == "teacher" and course.owner_id == user.id)):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
@@ -52,9 +49,7 @@ def list_lessons(course_id: int, db: DbSession, user: CurrentUser):
     check_lesson_access(db, course, user)
     return list(
         db.scalars(
-            select(Lesson)
-            .where(Lesson.course_id == course_id)
-            .order_by(Lesson.position, Lesson.id)
+            select(Lesson).where(Lesson.course_id == course_id).order_by(Lesson.position, Lesson.id)
         ).all()
     )
 

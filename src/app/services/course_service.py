@@ -16,11 +16,7 @@ def list_courses(
     if user.role == "student":
         query = query.where(Course.is_published.is_(True))
 
-    return list(
-        db.scalars(
-            query.order_by(Course.id).offset(skip).limit(limit)
-        ).all()
-    )
+    return list(db.scalars(query.order_by(Course.id).offset(skip).limit(limit)).all())
 
 
 def get_course(db: Session, course_id: int) -> Course | None:
