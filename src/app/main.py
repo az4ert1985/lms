@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,7 +10,7 @@ from app.db.session import engine
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     engine.dispose()
 
@@ -36,7 +37,7 @@ if settings.cors_origins:
 
 
 @app.get("/health", tags=["Health"])
-def health():
+def health() -> dict[str, str]:
     return {
         "status": "ok",
         "environment": settings.app_env,

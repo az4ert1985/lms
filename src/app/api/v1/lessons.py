@@ -1,8 +1,11 @@
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.dependencies import CurrentUser, DbSession
+from app.models import User
 from app.models.course import Course, Lesson
 from app.models.enrollment import Enrollment
 from app.schemas.lesson import LessonCreate, LessonRead, LessonUpdate
@@ -17,12 +20,12 @@ def get_course_or_404(db: Session, course_id: int) -> Course:
     return course
 
 
-def check_manager(course: Course, user) -> None:
+def check_manager(course: Course, user: User) -> None:
     if not (user.role == "admin" or (user.role == "teacher" and course.owner_id == user.id)):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
-def check_lesson_access(db: Session, course: Course, user) -> None:
+def check_lesson_access(db: Session, course: Course, user: User) -> None:
     if user.role in {"admin"}:
         return
     if user.role == "teacher" and course.owner_id == user.id:
@@ -44,7 +47,7 @@ def check_lesson_access(db: Session, course: Course, user) -> None:
     "/courses/{course_id}/lessons",
     response_model=list[LessonRead],
 )
-def list_lessons(course_id: int, db: DbSession, user: CurrentUser):
+def list_lessons(course_id: int, db: DbSession, user: CurrentUser) -> list[Any]:
     course = get_course_or_404(db, course_id)
     check_lesson_access(db, course, user)
     return list(
@@ -64,7 +67,7 @@ def create_lesson(
     payload: LessonCreate,
     db: DbSession,
     user: CurrentUser,
-):
+) -> Lesson:
     course = get_course_or_404(db, course_id)
     check_manager(course, user)
 
@@ -81,7 +84,7 @@ def update_lesson(
     payload: LessonUpdate,
     db: DbSession,
     user: CurrentUser,
-):
+) -> Lesson:
     lesson = db.get(Lesson, lesson_id)
     if lesson is None:
         raise HTTPException(status_code=404, detail="Lesson not found")
@@ -100,7 +103,7 @@ def update_lesson(
     "/lessons/{lesson_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_lesson(lesson_id: int, db: DbSession, user: CurrentUser):
+def delete_lesson(lesson_id: int, db: DbSession, user: CurrentUser) -> None:
     lesson = db.get(Lesson, lesson_id)
     if lesson is None:
         raise HTTPException(status_code=404, detail="Lesson not found")

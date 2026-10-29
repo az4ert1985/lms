@@ -5,3 +5,17 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Mypy type checking
+        entry: mypy src/app
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: pytest
+        name: Run tests
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true

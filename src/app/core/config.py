@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -34,7 +36,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = []
 
     @model_validator(mode="after")
-    def validate_security(self):
+    def validate_security(self) -> Settings:
         secret = self.jwt_secret_key.get_secret_value()
 
         if self.app_env == "production":
