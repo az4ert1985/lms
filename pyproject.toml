@@ -26,7 +26,28 @@ dev = [
     "httpx>=0.28,<1.0",
     "ruff>=0.9,<1.0",
     "pre-commit",
+    "mypy",
+    "sqlalchemy[mypy]",
+    "pydantic[mypy]",
 ]
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+files = ["src/app"]
+exclude = ["migrations/"]
+
+strict = true
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+]
+ignore_missing_imports = true
 
 [tool.setuptools.packages.find]
 where = ["src"]

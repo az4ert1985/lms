@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -16,7 +18,7 @@ router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
     response_model=EnrollmentRead,
     status_code=status.HTTP_201_CREATED,
 )
-def enroll(payload: EnrollmentCreate, db: DbSession, user: CurrentUser):
+def enroll(payload: EnrollmentCreate, db: DbSession, user: CurrentUser) -> Enrollment:
     student_id = user.id
 
     if user.role == "admin":
@@ -63,7 +65,7 @@ def enroll(payload: EnrollmentCreate, db: DbSession, user: CurrentUser):
 
 
 @router.get("/me", response_model=list[EnrollmentRead])
-def my_enrollments(db: DbSession, user: CurrentUser):
+def my_enrollments(db: DbSession, user: CurrentUser) -> list[Any]:
     return list(
         db.scalars(
             select(Enrollment)

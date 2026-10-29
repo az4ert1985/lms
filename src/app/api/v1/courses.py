@@ -2,13 +2,14 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from app.dependencies import CurrentUser, DbSession
 from app.models.course import Course
+from app.models.user import User
 from app.schemas.course import CourseCreate, CourseDetail, CourseRead, CourseUpdate
 from app.services.course_service import create_course, list_courses
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
-def can_manage(course: Course, user) -> bool:
+def can_manage(course: Course, user: User) -> bool:
     return user.role == "admin" or (user.role == "teacher" and course.owner_id == user.id)
 
 
@@ -18,7 +19,7 @@ def get_courses(
     user: CurrentUser,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
-):
+) -> list[Course]:
     return list_courses(db, user, skip, limit)
 
 
@@ -31,7 +32,7 @@ def post_course(
     payload: CourseCreate,
     db: DbSession,
     user: CurrentUser,
-):
+) -> Course:
     if user.role not in {"admin", "teacher"}:
         raise HTTPException(status_code=403, detail="Forbidden")
 
@@ -44,7 +45,7 @@ def post_course(
 
 
 @router.get("/{course_id}", response_model=CourseDetail)
-def get_course(course_id: int, db: DbSession, user: CurrentUser):
+def get_course(course_id: int, db: DbSession, user: CurrentUser) -> Course:
     course = db.get(Course, course_id)
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -61,7 +62,7 @@ def patch_course(
     payload: CourseUpdate,
     db: DbSession,
     user: CurrentUser,
-):
+) -> Course:
     course = db.get(Course, course_id)
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -77,7 +78,7 @@ def patch_course(
 
 
 @router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_course(course_id: int, db: DbSession, user: CurrentUser):
+def delete_course(course_id: int, db: DbSession, user: CurrentUser) -> None:
     course = db.get(Course, course_id)
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")

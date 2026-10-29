@@ -22,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
 )
-def register(payload: UserCreate, db: DbSession):
+def register(payload: UserCreate, db: DbSession) -> User:
     existing = db.scalar(select(User).where(User.email == payload.email))
     if existing:
         raise HTTPException(
@@ -46,7 +46,7 @@ def register(payload: UserCreate, db: DbSession):
 def login(
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: DbSession,
-):
+) -> TokenResponse:
     user = db.scalar(select(User).where(User.email == form.username.lower()))
 
     if (
@@ -64,5 +64,5 @@ def login(
 
 
 @router.get("/me", response_model=UserRead)
-def me(user: CurrentUser):
+def me(user: CurrentUser) -> User:
     return user
