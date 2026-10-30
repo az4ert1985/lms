@@ -29,6 +29,7 @@ dev = [
     "mypy",
     "sqlalchemy[mypy]",
     "pydantic[mypy]",
+    "bandit",
 ]
 [tool.mypy]
 python_version = "3.12"
@@ -74,3 +75,7 @@ select = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.bandit]
+target = ["src/app"]
+exclude_dirs = ["tests"]
