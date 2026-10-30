@@ -41,5 +41,8 @@ jobs:
       - name: Check types with mypy
         run: mypy src/app
 
+      - name: Security scan with Bandit
+        run: bandit -r src/app -ll
+
       - name: Run tests
         run: pytest -q
