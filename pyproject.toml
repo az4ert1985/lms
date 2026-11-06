@@ -81,4 +81,3 @@ skips = ["B101"]
 
 [tool.bandit.assert_used]
 skips = ["*/test_*.py"]
-
