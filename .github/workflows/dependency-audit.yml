@@ -34,7 +34,7 @@ jobs:
 
       - name: Run dependency audit
         run: |
-          pip-audit --strict
+          pip-audit --strict --skip-editable
 
       - name: Generate audit report
         if: always()
