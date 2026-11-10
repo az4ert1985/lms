@@ -20,21 +20,33 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14.10"
-          cache: pip
+          python-version: "3.12"
 
       - name: Install pip-audit
         run: |
           python -m pip install --upgrade pip
           python -m pip install pip-audit
 
-      - name: Install project dependencies
-        run: |
-          python -m pip install -e ".[dev]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
 
-      - name: Run dependency audit
+      - name: Install dependencies
         run: |
-          pip-audit --strict --skip-editable
+          uv sync --locked --all-extras
+
+      - name: Export locked dependencies
+        run: |
+            uv export \
+            --locked \
+            --all-extras \
+            --no-emit-project \
+            --format requirements.txt \
+            --output-file requirements.txt
+
+      - name: Run pip-audit
+        run: uv run pip-audit --strict -r requirements.txt
 
       - name: Generate audit report
         if: always()
