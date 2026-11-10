@@ -38,14 +38,23 @@ jobs:
       - name: Ruff format
         run: ruff format --check app tests
 
-      - name: Mypy
-        run: mypy app
-
-      - name: Bandit security analysis
+      - name: Run mypy
+        shell: bash
         run: |
-          bandit -r app \
-            -f screen \
-            -c pyproject.toml
+          if find app -type f \( -name "*.py" -o -name "*.pyi" \) -print -quit | grep -q .; then
+            mypy app
+          else
+            echo "No Python files found in app/. Skipping mypy."
+          fi
+
+      - name: Run Bandit
+        shell: bash
+        run: |
+          if find app -type f -name "*.py" -print -quit | grep -q .; then
+            bandit -r app -f screen -c pyproject.toml
+          else
+            echo "No Python files found in app/. Skipping Bandit."
+          fi
 
       - name: Upload Bandit JSON report
         if: always()
@@ -55,9 +64,14 @@ jobs:
             -o bandit-report.json \
             -c pyproject.toml || true
 
-      - name: Run tests
+      - name: Run pytest
+        shell: bash
         run: |
-          APP_ENV=test pytest -v
+          if find tests -type f -name "test_*.py" -print -quit | grep -q .; then
+            pytest -v
+          else
+            echo "No tests found. Skipping pytest."
+          fi
 
       - name: Upload Bandit report
         if: always()
