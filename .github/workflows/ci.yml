@@ -1,0 +1,86 @@
+
+name: LMS API CI
+
+on:
+  pull_request:
+    branches:
+      - development
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Code quality and security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --locked --all-extras
+
+      - name: Ruff lint
+        run: uv run ruff check app tests
+
+      - name: Ruff format
+        run: uv run ruff format --check app tests
+
+      - name: Run mypy
+        shell: bash
+        run: |
+          if find app -type f \( -name "*.py" -o -name "*.pyi" \) -print -quit | grep -q .; then
+            uv run mypy app
+          else
+            echo "No Python files found in app/. Skipping mypy."
+          fi
+
+      - name: Run Bandit
+        shell: bash
+        run: |
+          if find app -type f -name "*.py" -print -quit | grep -q .; then
+            uv run bandit -r app -f screen -c pyproject.toml
+          else
+            echo "No Python files found in app/. Skipping Bandit."
+          fi
+
+      - name: Upload Bandit JSON report
+        if: always()
+        run: |
+          uv run bandit -r app \
+            -f json \
+            -o bandit-report.json \
+            -c pyproject.toml || true
+
+      - name: Run pytest
+        shell: bash
+        run: |
+          if find tests -type f -name "test_*.py" -print -quit | grep -q .; then
+            uv run pytest -v
+          else
+            echo "No tests found. Skipping pytest."
+          fi
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+          if-no-files-found: ignore
+          retention-days: 30

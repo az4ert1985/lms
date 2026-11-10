@@ -1,0 +1,65 @@
+name: Python Dependency Security Audit
+on:
+  pull_request:
+    branches:
+      - development
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  pip-audit:
+    name: Dependency vulnerability audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pip-audit
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --locked --all-extras
+
+      - name: Export locked dependencies
+        run: |
+            uv export \
+            --locked \
+            --all-extras \
+            --no-emit-project \
+            --format requirements.txt \
+            --output-file requirements.txt
+
+      - name: Run pip-audit
+        run: uv run pip-audit --strict -r requirements.txt
+
+      - name: Generate audit report
+        if: always()
+        run: |
+          pip-audit \
+            --format json \
+            --output pip-audit-report.json || true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          if-no-files-found: ignore
+          retention-days: 30
