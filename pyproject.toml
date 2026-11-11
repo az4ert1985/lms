@@ -62,8 +62,8 @@ indent-style = "space"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "."
 files = ["app"]
+explicit_package_bases = true
 exclude = ["alembic/"]
 
 [[tool.mypy.overrides]]
