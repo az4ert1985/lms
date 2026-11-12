@@ -1,6 +1,6 @@
 import uuid
-from collections.abc import Callable
-from typing import Annotated
+from collections.abc import Callable, Coroutine
+from typing import Annotated, Any
 
 import jwt
 from app.core.security import decode_access_token
@@ -50,7 +50,7 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def require_roles(*roles: UserRole) -> Callable[..., User]:
+def require_roles(*roles: UserRole) -> Callable[..., Coroutine[User, Any, Any]]:
     async def role_checker(
         current_user: CurrentUser,
     ) -> User:
