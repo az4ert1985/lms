@@ -3,13 +3,14 @@ from collections.abc import Callable, Coroutine
 from typing import Annotated, Any
 
 import jwt
-from app.core.security import decode_access_token
-from app.db.models.user import User, UserRole
-from app.db.session import get_db
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import decode_access_token
+from app.db.models.user import User, UserRole
+from app.db.session import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
