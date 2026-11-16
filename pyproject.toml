@@ -33,6 +33,7 @@ dev = [
     "httpx>=0.28",
     "aiosqlite>=0.21",
     "pre-commit>=4.1",
+    "pytest-cov>=6.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -75,7 +76,21 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 asyncio_default_test_loop_scope = "function"
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --cov=app --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+omit = [
+    "app/__init__.py",
+    "app/main.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
+precision = 1
 
 [tool.bandit]
 exclude_dirs = ["tests", "alembic"]

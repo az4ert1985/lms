@@ -43,21 +43,11 @@ jobs:
 
       - name: Run mypy
         shell: bash
-        run: |
-          if find app -type f \( -name "*.py" -o -name "*.pyi" \) -print -quit | grep -q .; then
-            uv run mypy app
-          else
-            echo "No Python files found in app/. Skipping mypy."
-          fi
+        run: uv run mypy app
 
       - name: Run Bandit
         shell: bash
-        run: |
-          if find app -type f -name "*.py" -print -quit | grep -q .; then
-            uv run bandit -r app -f screen -c pyproject.toml
-          else
-            echo "No Python files found in app/. Skipping Bandit."
-          fi
+        run: uv run bandit -r app -f screen -c pyproject.toml
 
       - name: Upload Bandit JSON report
         if: always()
@@ -68,13 +58,16 @@ jobs:
             -c pyproject.toml || true
 
       - name: Run pytest
-        shell: bash
-        run: |
-          if find tests -type f -name "test_*.py" -print -quit | grep -q .; then
-            uv run pytest -v
-          else
-            echo "No tests found. Skipping pytest."
-          fi
+        run: uv run pytest -v --cov-report=xml:coverage.xml
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Upload Bandit report
         if: always()
