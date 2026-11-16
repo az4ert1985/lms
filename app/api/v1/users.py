@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from app.api.dependencies import DBSession
+from app.api.dependencies import CurrentUser, DBSession
 from app.core.security import hash_password
 from app.db.models.user import User
 from app.schemas.user import UserCreate, UserResponse
@@ -38,3 +38,8 @@ async def create_user(
     await db.refresh(user)
 
     return UserResponse.model_validate(user)
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user: CurrentUser) -> UserResponse:
+    return UserResponse.model_validate(current_user)
