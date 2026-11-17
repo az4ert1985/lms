@@ -12,6 +12,7 @@ TEST_PASSWORD = "Integration-Test-Password-123!"  # noqa: S105
 
 @pytest.fixture(autouse=True)
 async def clean_database():
+    await engine.dispose()
     async with engine.begin() as connection:
         await connection.execute(
             text(
