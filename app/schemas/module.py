@@ -38,5 +38,5 @@ class ModuleResponse(BaseModel):
     id: uuid.UUID
     course_id: uuid.UUID
     title: str
-    description: str | None
+    description: str | None = None
     position: int
