@@ -3,6 +3,7 @@ from sqlalchemy import select
 
 from app.api.dependencies import CurrentUser, DBSession
 from app.core.security import hash_password
+from app.db.models import UserRole
 from app.db.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 
@@ -30,7 +31,7 @@ async def create_user(
         email=str(payload.email),
         full_name=payload.full_name,
         hashed_password=hash_password(payload.password),
-        role=payload.role,
+        role=UserRole.STUDENT,
     )
 
     db.add(user)
