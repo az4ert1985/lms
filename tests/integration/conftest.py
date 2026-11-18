@@ -7,7 +7,7 @@ from app.db.session import AsyncSessionFactory, engine
 from httpx import AsyncClient
 from sqlalchemy import text
 
-TEST_PASSWORD = "Integration-Test-Password-123!"  # noqa: S105
+TEST_PASSWORD = "Integration-Test-Password-123!"
 
 
 @pytest.fixture(autouse=True)

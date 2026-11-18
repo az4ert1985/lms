@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
-TEST_PASSWORD = "Integration-Test-Password-123!"  # noqa: S105
+TEST_PASSWORD = "Integration-Test-Password-123!"
 
 
 @pytest.mark.integration
@@ -96,3 +96,27 @@ async def test_login_rejects_invalid_password(
     )
 
     assert response.status_code == 401
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("requested_role", ["admin", "teacher", None])
+async def test_public_registration_always_assigns_student_role(
+    client: AsyncClient,
+    requested_role: str | None,
+) -> None:
+    payload = {
+        "email": f"registration-{requested_role or 'default'}@example.com",
+        "full_name": "Registration Test User",
+        "password": "Strong-Test-Password-123!",
+    }
+
+    if requested_role is not None:
+        payload["role"] = requested_role
+
+    response = await client.post(
+        "/api/v1/users/",
+        json=payload,
+    )
+
+    assert response.status_code == 201
+    assert response.json()["role"] == "student"

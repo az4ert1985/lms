@@ -16,7 +16,7 @@ from fastapi import HTTPException
 
 
 def test_password_hashing() -> None:
-    password = "Strong-Test-Password-123!"  # noqa: S105
+    password = "Strong-Test-Password-123!"
 
     hashed = hash_password(password)
 
