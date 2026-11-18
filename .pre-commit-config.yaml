@@ -26,7 +26,13 @@ repos:
     rev: 1.8.3
     hooks:
       - id: bandit
+        name: Bandit - application
         args: ["-c", "pyproject.toml", "-r", "app"]
+        pass_filenames: false
+
+      - id: bandit
+        name: Bandit - tests
+        args: ["-c", "pyproject.toml", "-r", "tests", "-s", "S106"]
         pass_filenames: false
 
   - repo: local

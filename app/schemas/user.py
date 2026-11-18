@@ -9,7 +9,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     full_name: str
     password: str
-    role: UserRole = UserRole.STUDENT
 
 
 class UserResponse(BaseModel):

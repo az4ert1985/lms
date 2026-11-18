@@ -21,7 +21,7 @@ async def test_create_user_duplicate_email(
             UserCreate(
                 email="existing@example.com",
                 full_name="Existing User",
-                password="password",  # noqa: S106
+                password="password",
             ),
             fake_db,
         )
@@ -45,7 +45,7 @@ async def test_create_user_success(fake_db, make_result) -> None:
             UserCreate(
                 email="new@example.com",
                 full_name="New User",
-                password="password",  # noqa: S106
+                password="password",
             ),
             fake_db,
         )
