@@ -13,14 +13,21 @@ from fastapi import HTTPException
 async def test_login_success(fake_db, make_user, make_result) -> None:
     user = make_user(role=UserRole.STUDENT)
     fake_db.execute.return_value = make_result(scalar=user)
+
     form = SimpleNamespace(
         username=user.email,
         password="correct-password",
     )
 
     with (
-        patch.object(auth, "verify_password", return_value=True),
-        patch.object(auth, "create_access_token", return_value="test-token"),
+        patch(
+            "app.services.auth_service.verify_password",
+            return_value=True,
+        ),
+        patch(
+            "app.services.auth_service.create_access_token",
+            return_value="test-token",
+        ),
     ):
         response = await auth.login(fake_db, form)
 
@@ -31,6 +38,7 @@ async def test_login_success(fake_db, make_user, make_result) -> None:
 @pytest.mark.asyncio
 async def test_login_user_not_found(fake_db, make_result) -> None:
     fake_db.execute.return_value = make_result(scalar=None)
+
     form = SimpleNamespace(
         username="missing@example.com",
         password="password",
@@ -46,10 +54,17 @@ async def test_login_user_not_found(fake_db, make_result) -> None:
 async def test_login_inactive_user(fake_db, make_user, make_result) -> None:
     user = make_user(is_active=False)
     fake_db.execute.return_value = make_result(scalar=user)
-    form = SimpleNamespace(username=user.email, password="password")
+
+    form = SimpleNamespace(
+        username=user.email,
+        password="password",
+    )
 
     with (
-        patch.object(auth, "verify_password", return_value=True),
+        patch(
+            "app.services.auth_service.verify_password",
+            return_value=True,
+        ),
         pytest.raises(HTTPException) as exc,
     ):
         await auth.login(fake_db, form)
@@ -61,10 +76,17 @@ async def test_login_inactive_user(fake_db, make_user, make_result) -> None:
 async def test_login_wrong_password(fake_db, make_user, make_result) -> None:
     user = make_user()
     fake_db.execute.return_value = make_result(scalar=user)
-    form = SimpleNamespace(username=user.email, password="wrong-password")
+
+    form = SimpleNamespace(
+        username=user.email,
+        password="wrong-password",
+    )
 
     with (
-        patch.object(auth, "verify_password", return_value=False),
+        patch(
+            "app.services.auth_service.verify_password",
+            return_value=False,
+        ),
         pytest.raises(HTTPException) as exc,
     ):
         await auth.login(fake_db, form)
@@ -94,7 +116,7 @@ async def test_registration_always_assigns_student_role(
     fake_db.execute.return_value = make_result()
 
     monkeypatch.setattr(
-        "app.api.v1.users.hash_password",
+        "app.services.user_service.hash_password",
         lambda _: "hashed-password",
     )
 
@@ -139,8 +161,8 @@ async def test_registration_without_role_assigns_student(
     fake_db.execute.return_value = make_result()
 
     monkeypatch.setattr(
-        "app.api.v1.users.hash_password",
-        lambda _cls: "hashed-password",
+        "app.services.user_service.hash_password",
+        lambda _: "hashed-password",
     )
 
     async def refresh_user(user: object) -> None:
