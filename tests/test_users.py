@@ -40,7 +40,10 @@ async def test_create_user_success(fake_db, make_result) -> None:
 
     fake_db.refresh.side_effect = refresh
 
-    with patch.object(users, "hash_password", return_value="hashed-password"):
+    with patch(
+        "app.services.user_service.hash_password",
+        return_value="hashed-password",
+    ):
         response = await users.create_user(
             UserCreate(
                 email="new@example.com",
