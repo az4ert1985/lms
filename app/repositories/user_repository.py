@@ -1,0 +1,9 @@
+from app.db.models.user import User
+from app.repositories.base import BaseRepository
+from sqlalchemy import select
+
+
+class UserRepository(BaseRepository):
+    async def get_by_email(self, email: str) -> User | None:
+        result = await self.session.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
