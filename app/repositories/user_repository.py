@@ -1,6 +1,7 @@
+from sqlalchemy import select
+
 from app.db.models.user import User
 from app.repositories.base import BaseRepository
-from sqlalchemy import select
 
 
 class UserRepository(BaseRepository):

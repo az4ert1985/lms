@@ -1,10 +1,11 @@
 from uuid import UUID
 
+from fastapi import HTTPException
+
 from app.db.models.lesson import Lesson
 from app.db.models.user import User, UserRole
 from app.repositories.lesson_repository import LessonRepository
 from app.schemas.lesson import LessonCreate
-from fastapi import HTTPException
 
 
 class LessonService:

@@ -1,11 +1,12 @@
 from uuid import UUID
 
+from fastapi import HTTPException
+
 from app.db.models.module import Module
 from app.db.models.user import User, UserRole
 from app.repositories.course_repository import CourseRepository
 from app.repositories.module_repository import ModuleRepository
 from app.schemas.module import ModuleCreate
-from fastapi import HTTPException
 
 
 class ModuleService:

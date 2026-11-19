@@ -1,10 +1,11 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
+
 from app.db.models.course import Course
 from app.db.models.user import User, UserRole
 from app.repositories.course_repository import CourseRepository
 from app.schemas.course import CourseCreate, CourseUpdate
-from fastapi import HTTPException, status
 
 
 class CourseService:

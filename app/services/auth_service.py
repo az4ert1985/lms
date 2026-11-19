@@ -1,6 +1,7 @@
+from fastapi import HTTPException, status
+
 from app.core.security import create_access_token, verify_password
 from app.repositories.user_repository import UserRepository
-from fastapi import HTTPException, status
 
 
 class AuthService:

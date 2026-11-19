@@ -1,9 +1,10 @@
 import uuid
 
+from fastapi import HTTPException
+
 from app.db.models.enrollment import Enrollment
 from app.db.models.user import User, UserRole
 from app.repositories.enrollment_repository import EnrollmentRepository
-from fastapi import HTTPException
 
 
 class EnrollmentService:

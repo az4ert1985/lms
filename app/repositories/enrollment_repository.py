@@ -1,9 +1,10 @@
 from uuid import UUID
 
+from sqlalchemy import select
+
 from app.db.models.course import Course
 from app.db.models.enrollment import Enrollment
 from app.repositories.base import BaseRepository
-from sqlalchemy import select
 
 
 class EnrollmentRepository(BaseRepository):
