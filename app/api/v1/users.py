@@ -1,10 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, status
 
-from app.api.dependencies import CurrentUser, DBSession
-from app.core.security import hash_password
-from app.db.models import UserRole
-from app.db.models.user import User
+from app.api.dependencies import CurrentUser, DBSession, build_user_service
 from app.schemas.user import UserCreate, UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -19,25 +15,7 @@ async def create_user(
     payload: UserCreate,
     db: DBSession,
 ) -> UserResponse:
-    existing = await db.execute(select(User).where(User.email == payload.email))
-
-    if existing.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
-        )
-
-    user = User(
-        email=str(payload.email),
-        full_name=payload.full_name,
-        hashed_password=hash_password(payload.password),
-        role=UserRole.STUDENT,
-    )
-
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-
+    user = await build_user_service(db).create_user(payload)
     return UserResponse.model_validate(user)
 
 

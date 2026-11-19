@@ -21,11 +21,11 @@ async def test_login_success(fake_db, make_user, make_result) -> None:
 
     with (
         patch(
-            "app.api.v1.auth.verify_password",
+            "app.services.auth_service.verify_password",
             return_value=True,
         ),
         patch(
-            "app.api.v1.auth.create_access_token",
+            "app.services.auth_service.create_access_token",
             return_value="test-token",
         ),
     ):
@@ -84,7 +84,7 @@ async def test_login_wrong_password(fake_db, make_user, make_result) -> None:
 
     with (
         patch(
-            "app.api.v1.auth.verify_password",
+            "app.services.auth_service.verify_password",
             return_value=False,
         ),
         pytest.raises(HTTPException) as exc,

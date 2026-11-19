@@ -11,8 +11,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import decode_access_token
 from app.db.models.user import User, UserRole
 from app.db.session import get_db
+from app.repositories.course_repository import CourseRepository
+from app.repositories.enrollment_repository import EnrollmentRepository
+from app.repositories.lesson_repository import LessonRepository
+from app.repositories.module_repository import ModuleRepository
+from app.repositories.user_repository import UserRepository
+from app.services.auth_service import AuthService
+from app.services.course_service import CourseService
+from app.services.enrollment_service import EnrollmentService
+from app.services.lesson_service import LessonService
+from app.services.module_service import ModuleService
+from app.services.user_service import UserService
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/auth/login",
+)
 
 DBSession = Annotated[AsyncSession, Depends(get_db)]
 
@@ -51,7 +64,9 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def require_roles(*roles: UserRole) -> Callable[..., Coroutine[User, Any, Any]]:
+def require_roles(
+    *roles: UserRole,
+) -> Callable[..., Coroutine[User, Any, Any]]:
     async def role_checker(
         current_user: CurrentUser,
     ) -> User:
@@ -63,3 +78,34 @@ def require_roles(*roles: UserRole) -> Callable[..., Coroutine[User, Any, Any]]:
         return current_user
 
     return role_checker
+
+
+# Service factories.
+# All repositories created for a request share one AsyncSession.
+
+
+def build_auth_service(db: AsyncSession) -> AuthService:
+    return AuthService(UserRepository(db))
+
+
+def build_user_service(db: AsyncSession) -> UserService:
+    return UserService(UserRepository(db))
+
+
+def build_course_service(db: AsyncSession) -> CourseService:
+    return CourseService(CourseRepository(db))
+
+
+def build_module_service(db: AsyncSession) -> ModuleService:
+    return ModuleService(
+        CourseRepository(db),
+        ModuleRepository(db),
+    )
+
+
+def build_lesson_service(db: AsyncSession) -> LessonService:
+    return LessonService(LessonRepository(db))
+
+
+def build_enrollment_service(db: AsyncSession) -> EnrollmentService:
+    return EnrollmentService(EnrollmentRepository(db))
