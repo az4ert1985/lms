@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from app.api.dependencies import build_enrollment_service
 from app.api.v1 import enrollments
 from app.db.models import UserRole
 from fastapi import HTTPException
@@ -11,7 +12,9 @@ async def test_enroll_student_wrong_role(fake_db, make_user) -> None:
     user = make_user(role=UserRole.TEACHER)
 
     with pytest.raises(HTTPException) as exc:
-        await enrollments.enroll_student(str(uuid4()), fake_db, user)
+        await enrollments.enroll_student(
+            str(uuid4()), build_enrollment_service(fake_db), user
+        )
 
     assert exc.value.status_code == 403
 
@@ -21,7 +24,9 @@ async def test_enroll_student_invalid_course_id(fake_db, make_user) -> None:
     user = make_user(role=UserRole.STUDENT)
 
     with pytest.raises(HTTPException) as exc:
-        await enrollments.enroll_student("invalid-uuid", fake_db, user)
+        await enrollments.enroll_student(
+            "invalid-uuid", build_enrollment_service(fake_db), user
+        )
 
     assert exc.value.status_code == 422
 
@@ -36,7 +41,9 @@ async def test_enroll_student_course_not_found(
     fake_db.execute.return_value = make_result(scalar=None)
 
     with pytest.raises(HTTPException) as exc:
-        await enrollments.enroll_student(str(uuid4()), fake_db, user)
+        await enrollments.enroll_student(
+            str(uuid4()), build_enrollment_service(fake_db), user
+        )
 
     assert exc.value.status_code == 404
 
@@ -56,7 +63,9 @@ async def test_enroll_student_already_enrolled(
     ]
 
     with pytest.raises(HTTPException) as exc:
-        await enrollments.enroll_student(str(course.id), fake_db, user)
+        await enrollments.enroll_student(
+            str(course.id), build_enrollment_service(fake_db), user
+        )
 
     assert exc.value.status_code == 409
 
@@ -83,7 +92,7 @@ async def test_enroll_student_success(
 
     response = await enrollments.enroll_student(
         str(course.id),
-        fake_db,
+        build_enrollment_service(fake_db),
         user,
     )
 

@@ -3,6 +3,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
+from app.api.dependencies import build_user_service
 from app.api.v1 import users
 from app.db.models import UserRole
 from app.schemas.user import UserCreate
@@ -23,7 +24,7 @@ async def test_create_user_duplicate_email(
                 full_name="Existing User",
                 password="password",
             ),
-            fake_db,
+            build_user_service(fake_db),
         )
 
     assert exc.value.status_code == 409
@@ -50,7 +51,7 @@ async def test_create_user_success(fake_db, make_result) -> None:
                 full_name="New User",
                 password="password",
             ),
-            fake_db,
+            build_user_service(fake_db),
         )
 
     assert response.email == "new@example.com"

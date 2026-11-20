@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, status
 
-from app.api.dependencies import CurrentUser, DBSession, build_lesson_service
+from app.api.dependencies import CurrentUser, LessonServiceDep
 from app.schemas.lesson import LessonCreate, LessonResponse
 
 router = APIRouter(prefix="/modules/{module_id}/lessons", tags=["Lessons"])
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/modules/{module_id}/lessons", tags=["Lessons"])
 async def create_lesson(
     module_id: uuid.UUID,
     payload: LessonCreate,
-    db: DBSession,
+    service: LessonServiceDep,
     current_user: CurrentUser,
 ) -> LessonResponse:
-    lesson = await build_lesson_service(db).create_lesson(
+    lesson = await service.create_lesson(
         module_id,
         payload,
         current_user,
@@ -30,10 +30,10 @@ async def create_lesson(
 @router.get("/", response_model=list[LessonResponse])
 async def list_lessons(
     module_id: uuid.UUID,
-    db: DBSession,
+    service: LessonServiceDep,
     current_user: CurrentUser,
 ) -> list[LessonResponse]:
-    lessons = await build_lesson_service(db).list_lessons(
+    lessons = await service.list_lessons(
         module_id,
         current_user,
     )

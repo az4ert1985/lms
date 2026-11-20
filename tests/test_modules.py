@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from app.api.dependencies import build_module_service
 from app.api.v1 import modules
 from app.db.models import UserRole
 from app.schemas.module import ModuleCreate
@@ -26,7 +27,7 @@ async def test_create_module_success(
     response = await modules.create_module(
         course.id,
         ModuleCreate(title="Python basics", position=1),
-        fake_db,
+        build_module_service(fake_db),
         user,
     )
 
@@ -48,7 +49,7 @@ async def test_create_module_course_not_found(
         await modules.create_module(
             uuid4(),
             ModuleCreate(title="Module"),
-            fake_db,
+            build_module_service(fake_db),
             make_user(),
         )
 
@@ -70,7 +71,7 @@ async def test_create_module_forbidden(
         await modules.create_module(
             course.id,
             ModuleCreate(title="Module"),
-            fake_db,
+            build_module_service(fake_db),
             user,
         )
 
@@ -86,7 +87,7 @@ async def test_list_modules_course_not_found(
     fake_db.execute.return_value = make_result(scalar=None)
 
     with pytest.raises(HTTPException) as exc:
-        await modules.list_modules(uuid4(), fake_db, make_user())
+        await modules.list_modules(uuid4(), build_module_service(fake_db), make_user())
 
     assert exc.value.status_code == 404
 
@@ -103,7 +104,7 @@ async def test_list_modules_student_unpublished(
     fake_db.execute.return_value = make_result(scalar=course)
 
     with pytest.raises(HTTPException) as exc:
-        await modules.list_modules(course.id, fake_db, user)
+        await modules.list_modules(course.id, build_module_service(fake_db), user)
 
     assert exc.value.status_code == 404
 
@@ -120,7 +121,7 @@ async def test_list_modules_teacher_forbidden(
     fake_db.execute.return_value = make_result(scalar=course)
 
     with pytest.raises(HTTPException) as exc:
-        await modules.list_modules(course.id, fake_db, user)
+        await modules.list_modules(course.id, build_module_service(fake_db), user)
 
     assert exc.value.status_code == 403
 
@@ -141,7 +142,9 @@ async def test_list_modules_success(
         make_result(rows=[module]),
     ]
 
-    response = await modules.list_modules(course.id, fake_db, user)
+    response = await modules.list_modules(
+        course.id, build_module_service(fake_db), user
+    )
 
     assert len(response) == 1
     assert response[0].id == module.id

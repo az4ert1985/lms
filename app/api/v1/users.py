@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.api.dependencies import CurrentUser, DBSession, build_user_service
+from app.api.dependencies import CurrentUser, UserServiceDep
 from app.schemas.user import UserCreate, UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/users", tags=["Users"])
 )
 async def create_user(
     payload: UserCreate,
-    db: DBSession,
+    service: UserServiceDep,
 ) -> UserResponse:
-    user = await build_user_service(db).create_user(payload)
+    user = await service.create_user(payload)
     return UserResponse.model_validate(user)
 
 
