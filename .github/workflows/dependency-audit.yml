@@ -79,6 +79,7 @@ jobs:
           uv export \
             --locked \
             --all-extras \
+            --all-groups \
             --no-emit-project \
             --format requirements.txt \
             --output-file requirements.txt
