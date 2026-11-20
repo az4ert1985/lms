@@ -80,32 +80,65 @@ def require_roles(
     return role_checker
 
 
-# Service factories.
+# Service providers.
 # All repositories created for a request share one AsyncSession.
 
 
-def build_auth_service(db: AsyncSession) -> AuthService:
+def build_auth_service(db: DBSession) -> AuthService:
     return AuthService(UserRepository(db))
 
 
-def build_user_service(db: AsyncSession) -> UserService:
+def build_user_service(db: DBSession) -> UserService:
     return UserService(UserRepository(db))
 
 
-def build_course_service(db: AsyncSession) -> CourseService:
+def build_course_service(db: DBSession) -> CourseService:
     return CourseService(CourseRepository(db))
 
 
-def build_module_service(db: AsyncSession) -> ModuleService:
+def build_module_service(db: DBSession) -> ModuleService:
     return ModuleService(
         CourseRepository(db),
         ModuleRepository(db),
     )
 
 
-def build_lesson_service(db: AsyncSession) -> LessonService:
+def build_lesson_service(db: DBSession) -> LessonService:
     return LessonService(LessonRepository(db))
 
 
-def build_enrollment_service(db: AsyncSession) -> EnrollmentService:
+def build_enrollment_service(db: DBSession) -> EnrollmentService:
     return EnrollmentService(EnrollmentRepository(db))
+
+
+# Typed dependencies for API handlers.
+
+AuthServiceDep = Annotated[
+    AuthService,
+    Depends(build_auth_service),
+]
+
+UserServiceDep = Annotated[
+    UserService,
+    Depends(build_user_service),
+]
+
+CourseServiceDep = Annotated[
+    CourseService,
+    Depends(build_course_service),
+]
+
+ModuleServiceDep = Annotated[
+    ModuleService,
+    Depends(build_module_service),
+]
+
+LessonServiceDep = Annotated[
+    LessonService,
+    Depends(build_lesson_service),
+]
+
+EnrollmentServiceDep = Annotated[
+    EnrollmentService,
+    Depends(build_enrollment_service),
+]

@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from app.api.dependencies import build_lesson_service
 from app.api.v1 import lessons
 from app.db.models import UserRole
 from app.schemas.lesson import LessonCreate
@@ -19,7 +20,7 @@ async def test_create_lesson_module_not_found(
         await lessons.create_lesson(
             uuid4(),
             LessonCreate(title="Lesson"),
-            fake_db,
+            build_lesson_service(fake_db),
             make_user(),
         )
 
@@ -43,7 +44,7 @@ async def test_create_lesson_forbidden(
         await lessons.create_lesson(
             module.id,
             LessonCreate(title="Lesson"),
-            fake_db,
+            build_lesson_service(fake_db),
             user,
         )
 
@@ -71,7 +72,7 @@ async def test_create_lesson_success(
     response = await lessons.create_lesson(
         module.id,
         LessonCreate(title="Lesson", content="Content", position=1),
-        fake_db,
+        build_lesson_service(fake_db),
         user,
     )
 
@@ -89,7 +90,7 @@ async def test_list_lessons_module_not_found(
     fake_db.execute.return_value = make_result(one=None)
 
     with pytest.raises(HTTPException) as exc:
-        await lessons.list_lessons(uuid4(), fake_db, make_user())
+        await lessons.list_lessons(uuid4(), build_lesson_service(fake_db), make_user())
 
     assert exc.value.status_code == 404
 
@@ -108,7 +109,7 @@ async def test_list_lessons_student_unpublished(
     fake_db.execute.return_value = make_result(one=(module, course))
 
     with pytest.raises(HTTPException) as exc:
-        await lessons.list_lessons(module.id, fake_db, user)
+        await lessons.list_lessons(module.id, build_lesson_service(fake_db), user)
 
     assert exc.value.status_code == 404
 
@@ -127,7 +128,7 @@ async def test_list_lessons_teacher_forbidden(
     fake_db.execute.return_value = make_result(one=(module, course))
 
     with pytest.raises(HTTPException) as exc:
-        await lessons.list_lessons(module.id, fake_db, user)
+        await lessons.list_lessons(module.id, build_lesson_service(fake_db), user)
 
     assert exc.value.status_code == 403
 
@@ -150,7 +151,9 @@ async def test_list_lessons_success(
         make_result(rows=[lesson]),
     ]
 
-    response = await lessons.list_lessons(module.id, fake_db, user)
+    response = await lessons.list_lessons(
+        module.id, build_lesson_service(fake_db), user
+    )
 
     assert len(response) == 1
     assert response[0].id == lesson.id

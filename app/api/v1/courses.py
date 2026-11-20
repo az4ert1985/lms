@@ -1,22 +1,22 @@
 import uuid
 
 from fastapi import APIRouter, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import CurrentUser, DBSession, build_course_service
+from app.api.dependencies import CourseServiceDep, CurrentUser
 from app.db.models.course import Course
 from app.db.models.user import User
 from app.schemas.course import CourseCreate, CourseResponse, CourseUpdate
+from app.services.course_service import CourseService
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 @router.get("/", response_model=list[CourseResponse])
 async def list_courses(
-    db: DBSession,
+    service: CourseServiceDep,
     current_user: CurrentUser,
 ) -> list[CourseResponse]:
-    courses = await build_course_service(db).list_courses(current_user)
+    courses = await service.list_courses(current_user)
     return [CourseResponse.model_validate(course) for course in courses]
 
 
@@ -27,10 +27,10 @@ async def list_courses(
 )
 async def create_course(
     payload: CourseCreate,
-    db: DBSession,
+    service: CourseServiceDep,
     current_user: CurrentUser,
 ) -> CourseResponse:
-    course = await build_course_service(db).create_course(
+    course = await service.create_course(
         payload,
         current_user,
     )
@@ -39,10 +39,10 @@ async def create_course(
 
 async def get_accessible_course(
     course_id: uuid.UUID,
-    db: AsyncSession,
+    service: CourseService,
     current_user: User,
 ) -> Course:
-    return await build_course_service(db).get_accessible_course(
+    return await service.get_accessible_course(
         course_id,
         current_user,
     )
@@ -51,10 +51,10 @@ async def get_accessible_course(
 @router.get("/{course_id}", response_model=CourseResponse)
 async def get_course(
     course_id: uuid.UUID,
-    db: DBSession,
+    service: CourseServiceDep,
     current_user: CurrentUser,
 ) -> CourseResponse:
-    course = await build_course_service(db).get_course(
+    course = await service.get_course(
         course_id,
         current_user,
     )
@@ -65,10 +65,10 @@ async def get_course(
 async def update_course(
     course_id: uuid.UUID,
     payload: CourseUpdate,
-    db: DBSession,
+    service: CourseServiceDep,
     current_user: CurrentUser,
 ) -> CourseResponse:
-    course = await build_course_service(db).update_course(
+    course = await service.update_course(
         course_id,
         payload,
         current_user,
@@ -82,10 +82,10 @@ async def update_course(
 )
 async def delete_course(
     course_id: uuid.UUID,
-    db: DBSession,
+    service: CourseServiceDep,
     current_user: CurrentUser,
 ) -> None:
-    await build_course_service(db).delete_course(
+    await service.delete_course(
         course_id,
         current_user,
     )

@@ -1,10 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.api.dependencies import (
-    CurrentUser,
-    DBSession,
-    build_enrollment_service,
-)
+from app.api.dependencies import CurrentUser, EnrollmentServiceDep
 from app.schemas.enrollment import EnrollmentResponse
 
 router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
@@ -17,10 +13,10 @@ router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
 )
 async def enroll_student(
     course_id: str,
-    db: DBSession,
+    service: EnrollmentServiceDep,
     current_user: CurrentUser,
 ) -> EnrollmentResponse:
-    enrollment = await build_enrollment_service(db).enroll_student(
+    enrollment = await service.enroll_student(
         course_id,
         current_user,
     )

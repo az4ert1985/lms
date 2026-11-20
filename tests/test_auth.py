@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from app.api.dependencies import build_auth_service, build_user_service
 from app.api.v1 import auth
 from app.api.v1.users import create_user
 from app.db.models import UserRole
@@ -29,7 +30,7 @@ async def test_login_success(fake_db, make_user, make_result) -> None:
             return_value="test-token",
         ),
     ):
-        response = await auth.login(fake_db, form)
+        response = await auth.login(build_auth_service(fake_db), form)
 
     assert response.access_token == "test-token"
     assert response.token_type == "bearer"
@@ -45,7 +46,7 @@ async def test_login_user_not_found(fake_db, make_result) -> None:
     )
 
     with pytest.raises(HTTPException) as exc:
-        await auth.login(fake_db, form)
+        await auth.login(build_auth_service(fake_db), form)
 
     assert exc.value.status_code == 401
 
@@ -67,7 +68,7 @@ async def test_login_inactive_user(fake_db, make_user, make_result) -> None:
         ),
         pytest.raises(HTTPException) as exc,
     ):
-        await auth.login(fake_db, form)
+        await auth.login(build_auth_service(fake_db), form)
 
     assert exc.value.status_code == 401
 
@@ -89,7 +90,7 @@ async def test_login_wrong_password(fake_db, make_user, make_result) -> None:
         ),
         pytest.raises(HTTPException) as exc,
     ):
-        await auth.login(fake_db, form)
+        await auth.login(build_auth_service(fake_db), form)
 
     assert exc.value.status_code == 401
 
@@ -131,7 +132,7 @@ async def test_registration_always_assigns_student_role(
 
     fake_db.refresh.side_effect = refresh_user
 
-    response = await create_user(payload, fake_db)
+    response = await create_user(payload, build_user_service(fake_db))
 
     created_user = fake_db.add.call_args.args[0]
 
@@ -173,7 +174,7 @@ async def test_registration_without_role_assigns_student(
 
     fake_db.refresh.side_effect = refresh_user
 
-    response = await create_user(payload, fake_db)
+    response = await create_user(payload, build_user_service(fake_db))
 
     created_user = fake_db.add.call_args.args[0]
 
