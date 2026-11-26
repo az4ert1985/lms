@@ -1,0 +1,42 @@
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff Check
+        entry: uv run ruff check .
+        language: system
+        pass_filenames: false
+
+      - id: ruff-format
+        name: Ruff Format
+        entry: uv run ruff format --check .
+        language: system
+        pass_filenames: false
+
+      - id: mypy
+        name: MyPy
+        entry: >-
+          uv run python -c "import pathlib, subprocess, sys; files = list(pathlib.Path('app').rglob('*.py')) if pathlib.Path('app').exists() else []; print('MyPy skipped: no Python files in app/') if not files else sys.exit(subprocess.call(['uv', 'run', 'mypy', 'app']))"
+        language: system
+        pass_filenames: false
+
+      - id: bandit
+        name: Bandit Security Check
+        entry: uv run bandit -r app
+        language: system
+        pass_filenames: false
+
+      - id: pytest-unit
+        name: Unit Tests
+        entry: >-
+          uv run python -c "import pathlib, subprocess, sys; p = pathlib.Path('tests/unit'); files = list(p.rglob('test_*.py')) + list(p.rglob('*_test.py')) if p.exists() else []; print('Unit tests skipped: no test files found') if not files else sys.exit(subprocess.call(['uv', 'run', 'pytest', 'tests/unit', '-v', '--cov=app', '--cov-report=term-missing', '--cov-fail-under=80']))"
+        language: system
+        pass_filenames: false
+
+      - id: pytest-integration
+        name: Integration Tests
+        entry: >-
+          uv run python -c "import pathlib, subprocess, sys; p = pathlib.Path('tests/integration'); files = list(p.rglob('test_*.py')) + list(p.rglob('*_test.py')) if p.exists() else []; print('Integration tests skipped: no test files found') if not files else sys.exit(subprocess.call(['uv', 'run', 'pytest', 'tests/integration', '-v', '--cov=app', '--cov-report=term-missing', '--cov-fail-under=80']))"
+        language: system
+        pass_filenames: false
