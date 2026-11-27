@@ -67,8 +67,16 @@ jobs:
       - name: Check dependency changes
         id: changes
         run: |
-          git fetch origin "${{ github.base_ref }}"
-          if git diff --quiet "origin/${{ github.base_ref }}...HEAD" -- pyproject.toml uv.lock; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+            BASE_REF="origin/${{ github.base_ref }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+          fi
+
+          if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$BASE_REF...HEAD" -- pyproject.toml uv.lock; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
