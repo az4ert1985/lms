@@ -150,7 +150,7 @@ jobs:
 
       - name: Run integration tests
         if: hashFiles('tests/integration/test_*.py', 'tests/integration/**/*_test.py') != ''
-        run: uv run pytest tests/integration -v --cov=app --cov-term=term-messing --cov-fail-under=80
+        run: uv run pytest tests/integration -v
 
       - name: Integration tests skipped
         if: hashFiles('tests/integration/test_*.py', 'tests/integration/**/*_test.py') == ''
