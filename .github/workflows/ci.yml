@@ -50,6 +50,10 @@ jobs:
         if: hashFiles('app/**/*.py') != ''
         run: uv run bandit -r app
 
+      - name: Bandit skipped
+        if: hashFiles('app/**/*.py') == ''
+        run: echo "Bandit skipped: no Python files in app/"
+
   dependency-audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
