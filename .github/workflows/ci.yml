@@ -44,8 +44,7 @@ jobs:
 
       - name: MyPy skipped
         if: hashFiles('app/**/*.py') == ''
-        run:
-          echo "MyPy skipped: no Python files in app/"
+        run: echo "MyPy skipped: no Python files in app/"
 
       - name: Bandit
         run: uv run bandit -r app
