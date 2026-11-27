@@ -44,7 +44,8 @@ jobs:
 
       - name: MyPy skipped
         if: hashFiles('app/**/*.py') == ''
-        run: echo "MyPy skipped: no Python files in app/"
+        run:
+          echo "MyPy skipped: no Python files in app/"
 
       - name: Bandit
         run: uv run bandit -r app
@@ -91,7 +92,8 @@ jobs:
 
       - name: Audit skipped
         if: steps.changes.outputs.changed == 'false'
-        run: echo "Dependency audit skipped: no dependency changes"
+        run:
+          echo "Dependency audit skipped: no dependency changes"
 
   unit-tests:
     name: Unit Tests
@@ -116,7 +118,8 @@ jobs:
 
       - name: Unit tests skipped
         if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') == ''
-        run: echo "Unit tests skipped: no test files found"
+        run:
+          echo "Unit tests skipped: no test files found"
 
   integration-tests:
     name: Integration Tests
