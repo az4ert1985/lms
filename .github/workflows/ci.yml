@@ -47,6 +47,7 @@ jobs:
         run: echo "MyPy skipped: no Python files in app/"
 
       - name: Bandit
+        if: hashFiles('app/**/*.py') != ''
         run: uv run bandit -r app
 
   dependency-audit:
