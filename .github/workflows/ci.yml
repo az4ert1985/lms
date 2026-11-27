@@ -129,8 +129,7 @@ jobs:
 
       - name: Unit tests skipped
         if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') == ''
-        run:
-          echo "Unit tests skipped: no test files found"
+        run: echo "Unit tests skipped: no test files found"
 
   integration-tests:
     name: Integration Tests
