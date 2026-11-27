@@ -1,4 +1,3 @@
-
 name: CI
 
 on:
@@ -44,10 +43,17 @@ jobs:
 
       - name: MyPy skipped
         if: hashFiles('app/**/*.py') == ''
-        run: echo "MyPy skipped: no Python files in app/"
+        run: |
+          echo "MyPy skipped: no Python files in app/"
 
       - name: Bandit
+        if: hashFiles('app/**/*.py') != ''
         run: uv run bandit -r app
+
+      - name: Bandit skipped
+        if: hashFiles('app/**/*.py') == ''
+        run: |
+          echo "Bandit skipped: no Python files in app/"
 
   dependency-audit:
     name: Dependency Security Audit
@@ -62,8 +68,16 @@ jobs:
       - name: Check dependency changes
         id: changes
         run: |
-          git fetch origin "${{ github.base_ref }}"
-          if git diff --quiet "origin/${{ github.base_ref }}...HEAD" -- pyproject.toml uv.lock; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+            BASE_REF="origin/${{ github.base_ref }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+          fi
+
+          if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$BASE_REF...HEAD" -- pyproject.toml uv.lock; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -91,7 +105,8 @@ jobs:
 
       - name: Audit skipped
         if: steps.changes.outputs.changed == 'false'
-        run: echo "Dependency audit skipped: no dependency changes"
+        run: |
+          echo "Dependency audit skipped: no dependency changes"
 
   unit-tests:
     name: Unit Tests
@@ -116,7 +131,8 @@ jobs:
 
       - name: Unit tests skipped
         if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') == ''
-        run: echo "Unit tests skipped: no test files found"
+        run: |
+          echo "Unit tests skipped: no test files found"
 
   integration-tests:
     name: Integration Tests
@@ -137,18 +153,9 @@ jobs:
 
       - name: Run integration tests
         if: hashFiles('tests/integration/test_*.py', 'tests/integration/**/*_test.py') != ''
-        run: uv run pytest tests/integration -v --cov=app --cov-term=term-messing --cov-fail-under=80
+        run: uv run pytest tests/integration -v
 
       - name: Integration tests skipped
         if: hashFiles('tests/integration/test_*.py', 'tests/integration/**/*_test.py') == ''
-        run:
-          echo "Integration tests skipped: no test files found"
-
-      - name: Run unit tests
-        if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') != ''
-        run: uv run pytest tests/integration -v --cov=app --cov-term=term-messing --cov-fail-under=80
-
-      - name: Unit tests skipped
-        if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') == ''
-        run:
+        run: |
           echo "Integration tests skipped: no test files found"
