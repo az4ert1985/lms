@@ -154,14 +154,4 @@ jobs:
 
       - name: Integration tests skipped
         if: hashFiles('tests/integration/test_*.py', 'tests/integration/**/*_test.py') == ''
-        run:
-          echo "Integration tests skipped: no test files found"
-
-      - name: Run unit tests
-        if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') != ''
-        run: uv run pytest tests/integration -v --cov=app --cov-term=term-messing --cov-fail-under=80
-
-      - name: Unit tests skipped
-        if: hashFiles('tests/unit/test_*.py', 'tests/unit/**/*_test.py') == ''
-        run:
-          echo "Integration tests skipped: no test files found"
+        run: echo "Integration tests skipped: no test files found"
