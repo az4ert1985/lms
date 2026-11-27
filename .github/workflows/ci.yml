@@ -104,8 +104,7 @@ jobs:
 
       - name: Audit skipped
         if: steps.changes.outputs.changed == 'false'
-        run:
-          echo "Dependency audit skipped: no dependency changes"
+        run: echo "Dependency audit skipped: no dependency changes"
 
   unit-tests:
     name: Unit Tests
